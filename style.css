@@ -1,0 +1,1817 @@
+:root {
+  --hero-bg: #1f3aec;
+  --nav-bg: #2b47ff;
+  --ink: #000;
+  --ac: #2b47ff;
+  --ab: #7c93ff;
+  --paper: #fff;
+  --wire: #323232;
+  --card-radius: 22px;
+  --card-gap: 56px;
+  --ff-display: 'Sora', 'Google Sans Flex', sans-serif;
+  --ff-cond: 'Open Sans Condensed', sans-serif;
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body {
+  /* background: #0c0e1a; */
+  background: #1f3aec;
+  font-family: "Google Sans Flex", sans-serif;
+  overflow-x: hidden;
+  cursor: auto;
+  transition:
+    background 0.4s,
+    color 0.4s;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+.wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 44px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* ---------- Butterfly cursor (unchanged) ---------- */
+@media (pointer: fine) {
+  body, a, button { cursor: none; }
+}
+.bfc {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  pointer-events: none;
+  width: 80px;
+  height: 80px;
+  margin: -40px 0 0 -40px;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+/* .bfc svg { width: 100%; height: 100%; display: block; } */
+.bfc-art { width: 100%; height: 100%; display: block; }
+
+@keyframes bfcBob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-3px) rotate(-3deg); }
+}
+.bfc-float {
+  animation: bfcBob 2.4s ease-in-out infinite;
+  /* transform-origin: 17px 27px; */
+  transform-origin: 62.5px 48px;
+}
+
+@keyframes bfcFlap {
+  0%, 100% { transform: scaleX(1); }
+  50% { transform: scaleX(0.85); }
+}
+.bfc-wing-left {
+  transform-origin: 62.5px 48px;
+  animation: bfcFlap 0.5s ease-in-out infinite;
+}
+.bfc-wing-right {
+  transform-origin: 62.5px 48px;
+  animation: bfcFlap 0.5s ease-in-out infinite reverse;
+}
+.bfl {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9998;
+  border-radius: 50%;
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bfc-float, .bfc-wing-left, .bfc-wing-right { animation: none; }
+}
+@media (pointer: coarse) {
+  .bfc { display: none; }
+  body, a, button { cursor: auto; }
+}
+
+
+
+
+/* ---------- NAV ---------- */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  column-gap: 16px;
+  padding: 0 40px;
+  height: 54px;
+  background: var(--nav-bg);
+  border-bottom: 2px solid var(--ink);
+  transition:
+    transform 0.38s ease,
+    background 0.4s;
+    transition-delay: 0.3s;
+}
+
+nav.nav-hidden {
+  transform: translateY(-100%);
+}
+.nlinks {
+  grid-column: 2;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.nlinks a {
+  font-family: "Open Sans Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink);
+  position: relative;
+  padding: 4px 10px;
+  transition: letter-spacing 0.25s ease;
+  cursor: pointer;
+}
+.nlinks a::before,
+.nlinks a::after {
+  content: "•";
+  position: absolute;
+  top: 50%;
+  opacity: 0;
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+}
+.nlinks a::before {
+  left: 0;
+  transform: translate(-12px, -50%);
+}
+.nlinks a::after {
+  right: 0;
+  transform: translate(12px, -50%);
+}
+.nlinks a:hover {
+  letter-spacing: 0.015em;
+}
+.nlinks a:hover::before,
+.nlinks a:hover::after {
+  opacity: 1;
+  transform: translate(0, -50%);
+}
+
+.nlogo{
+  cursor: pointer;
+  justify-self: start;
+  grid-column: 1;
+}
+
+.dp-logo{
+  width: 50px;
+  height: 50px;
+}
+
+/* Hamburger toggle — hidden on desktop, shown only under the nav
+   breakpoint. Lives in the grid's third column; because that column
+   is a real `1fr` track (not content-sized), it keeps holding its
+   share of the width even while this button is display:none, so the
+   center column never drifts. */
+.nav-toggle {
+  display: none;
+  grid-column: 2;
+  justify-self: end;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+.nav-toggle span {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: var(--ink);
+  transition:
+    /* transform 0.25s ease, */
+    transform 0.25s cubic-bezier(0.65, 0, 0.35, 1),
+    opacity 0.25s ease;
+}
+.nav-toggle.open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.nav-toggle.open span:nth-child(2) {
+  opacity: 0;
+}
+.nav-toggle.open span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+@media (max-width: 860px) {
+  nav{
+    padding: 0 24px;
+  }
+  .dp-logo{
+    width: 40px;
+  }
+  .nav-toggle {
+    display: flex;
+  }
+  .nlinks {
+    position: fixed;
+    top: 54px;
+    left: 0;
+    right: 0;
+    z-index: 99;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: var(--nav-bg);
+    border-bottom: 2px solid var(--ink);
+    padding: 16px 0;
+    transform: translateY(-130%);
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      transform 0.3s ease,
+      opacity 0.3s ease;
+  }
+  .nlinks.open {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* optional polish: links fade/slide in one after another instead of all at once */
+  .nlinks a {
+    opacity: 0;
+    transform: translateY(-8px);
+    transition:
+      transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 0.25s ease-in-out;
+  }
+  .nlinks.open a {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .nlinks.open a:nth-child(1) { transition-delay: 0.05s; }
+  .nlinks.open a:nth-child(2) { transition-delay: 0.1s; }
+  .nlinks.open a:nth-child(3) { transition-delay: 0.15s; }
+  .nlinks.open a:nth-child(4) { transition-delay: 0.2s; }
+}
+
+
+
+
+
+/* ---------- HERO ---------- */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding-top: 68px;
+  overflow: hidden;
+  background: var(--hero-bg);
+}
+.hero-art {
+  position: absolute;
+  width: 100%;
+  /* height: auto; */
+  inset: 0;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Entrance: cloud1 -> cloud2 -> cloud3 -> butterfly, one after another on
+         load. Cloud4 (the full-width bottom band) is deliberately NOT part of
+         this — it stays fully visible and stable from the very first frame. */
+.cloud-in {
+  opacity: 0;
+  animation: cloudIn 0.9s ease-out forwards;
+}
+@keyframes cloudIn {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.cloud-in-1 {
+  animation-delay: 0.1s;
+}
+.cloud-in-2 {
+  animation-delay: 0.5s;
+}
+.cloud-in-3 {
+  animation-delay: 0.9s;
+}
+.cloud-in-4 {
+  animation-delay: 1.3s;
+}
+
+/* Continuous drift lives on the INNER group, entrance fade on the OUTER
+         wrapper above — two separate elements so the transforms don't clash. */
+/* .hc-cloud1 {
+  animation: driftWisp 34s ease-in-out infinite alternate;
+} */
+/* @keyframes driftWisp {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(18px);
+  }
+} */
+/* .hc-cloud2 {
+  animation: driftWisp2 30s ease-in-out infinite alternate;
+} */
+/* @keyframes driftWisp2 {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-16px);
+  }
+} */
+/* .hc-cloud3 {
+  left: 0;
+  top: 0; */
+  /* animation: driftMid 24s ease-in-out infinite alternate; */
+/* } */
+/* @keyframes driftMid {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-26px);
+  }
+} */
+
+
+      .hc-cloud1 {
+        animation: floatCloud1 9s ease-in-out infinite;
+      }
+      @keyframes floatCloud1 {
+        0%,
+        100% {
+          transform: translate(0, 0);
+        }
+        50% {
+          transform: translate(-10px, -20px);
+        }
+      }
+      .hc-cloud2 {
+        animation: floatCloud2 10.5s ease-in-out infinite;
+      }
+      @keyframes floatCloud2 {
+        0%,
+        100% {
+          transform: translate(0, 0);
+        }
+        50% {
+          transform: translate(-10px, -12px);
+        }
+      }
+      .hc-cloud3 {
+        animation: floatCloud3 8s ease-in-out infinite;
+      }
+      @keyframes floatCloud3 {
+        0%,
+        100% {
+          transform: translate(0, 0);
+        }
+        50% {
+          transform: translate(16px, -16px);
+        }
+      }
+
+
+/* cloud4 (.hc-cloud4): no animation at all — stable, full width, always visible */
+.hbf-float {
+  transform-origin: 1099px 480px;
+  animation: bfFloat 4.6s ease-in-out infinite;
+}
+@keyframes bfFloat {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(-6px, -16px) rotate(-2.5deg);
+  }
+}
+
+.hbf-wing-left {
+  transform-origin: 1099px 478px;
+  animation: bfFlap 0.62s ease-in-out infinite;
+}
+.hbf-wing-right {
+  transform-origin: 1099px 478px;
+  animation: bfFlap 0.62s ease-in-out infinite reverse;
+}
+@keyframes bfFlap {
+  0%,
+  100% {
+    transform: scaleX(1);
+  }
+  50% {
+    transform: scaleX(0.93);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hc-cloud1,
+  .hc-cloud2,
+  .hc-cloud3,
+  .hbf-float,
+  .hbf-wing-left,
+  .hbf-wing-right,
+  .cloud-in {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 2;
+  padding: 40px 0;
+  width: 100%;
+  margin-left: 8%;
+}
+
+/* The "HEY!" card — exact border/blur/divider from the Figma export,
+         with the heading as SVG art and the body copy as real, editable text. */
+.hero-card {
+  position: relative;
+  width: min(450px, 85vw);
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(18px);
+  padding: 26px 28px 24px;
+  isolation: isolate; /* keeps the overlay blend contained to this card */
+}
+/* Matches the SVG's construction exactly: a black rect at 12% opacity
+         blended with mix-blend-mode:overlay, separate from the blur itself. */
+.hero-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: #6e6e6e;
+  opacity: 0.12;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: -1;
+}
+.hero-card > * {
+  position: relative;
+}
+/* HEY! heading — 4 individually-animated letters, auto-plays on load
+   (no scroll-trigger needed, this section is already in view) */
+.hero-hey-letter {
+  opacity: 0;
+  transform: translateY(60px);
+  animation: heroLetterIn 0.55s ease forwards;
+}
+@keyframes heroLetterIn {
+  from { opacity: 0; transform: translateY(60px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Paragraph slides up shortly after */
+.hero-copy {
+  font-family: "Google Sans Flex", sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--ink);
+  opacity: 0;
+  transform: translateY(30px);
+  animation: heroCopyIn 0.6s ease forwards;
+  animation-delay: 500ms;
+}
+@keyframes heroCopyIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hero-hey {
+  width: 100%;
+  display: block;
+  margin-bottom: 6px;
+}
+.hero-divider {
+  border: none;
+  border-top: 2px dashed var(--ink);
+  margin: 18px 0 20px;
+}
+.hero-copy strong {
+  font-weight: 700;
+}
+
+
+@media (max-width: 700px) {
+  .hero-inner {
+    top: 100px;
+    margin-left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 40px 24px;
+  }
+  .hero-copy{
+    font-size: 0.85rem;
+  }
+  .hbf-mobile-shift {
+    transform: translateX(-399px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hc-cloud1,
+  .hc-cloud2,
+  .hc-cloud3,
+  .hbf-float,
+  .hbf-wing-left,
+  .hbf-wing-right,
+  .cloud-in,
+  .hero-hey-letter,
+  .hero-copy {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+
+
+
+/* WORK */
+/* ================= WORK SECTION ================= */
+.work-sec {
+  position: relative;
+  background: #4860fd;
+  padding: 100px 0 200px;
+  overflow: hidden;
+  border-bottom: 3px solid #000;
+}
+
+/* Top row: category tabs (left) + WORK heading (right) */
+.work-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 50px;
+}
+
+/* WORK heading — 4 individually-animated letters */
+.work-head-wrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+
+
+
+/* Old letters with svg's */
+.work-head {
+  /* width: min(500px, 60vw); */
+  width: clamp(270px, 34vw, 500px);
+}
+.work-letter {
+  opacity: 0;
+  transform: translateY(60px);
+  transition:
+    opacity 0.55s ease,
+    transform 0.55s ease;
+}
+.work-letter.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ---------------- Edge arrow buttons ----------------
+   A true CSS half-circle, not an SVG path: width = R, height = 2R, and
+   rounding the two "open" corners by exactly R (the box's own width)
+   is what makes that corner arc trace a perfect semicircle rather than
+   an approximation — so there's no aspect-ratio mismatch to letterbox
+   and no gap between the shape and the edge. Sized down from the
+   previous pass per feedback.
+   R = 56px → width 56px, height 112px. */
+.work-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+  width: 56px;
+  height: 112px;
+  background: #000;
+}
+.work-arrow.left {
+  left: 0;
+  border-radius: 0 56px 56px 0;
+}
+.work-arrow.right {
+  right: 0;
+  border-radius: 56px 0 0 56px;
+}
+.work-arrow:active {
+  transform: translateY(-50%) scale(0.97);
+}
+.work-arrow:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+/* Single glyph, identical animation on both buttons: only the arrow
+   itself moves forward on hover (mirrored direction), same duration
+   and easing on both sides — nothing duplicated or clipped. */
+.arrow-shape {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+.work-arrow.left .arrow-shape {
+  justify-content: flex-end;
+  padding-right: 15px;
+}
+.work-arrow.right .arrow-shape {
+  justify-content: flex-start;
+  padding-left: 15px;
+}
+.arrow-ic {
+  display: block;
+  transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.work-arrow.left:hover .arrow-ic {
+  transform: translateX(-8px);
+}
+.work-arrow.right:hover .arrow-ic {
+  transform: translateX(8px);
+}
+
+/* Category filter tabs */
+.wctabs {
+  margin-top: 10px;
+  display: flex;
+  border: 2px solid #000;
+  border-radius: 4px;
+  overflow: hidden;
+  width: fit-content;
+  flex-wrap: wrap;
+}
+.wctab {
+  padding: 10px 20px;
+  font-family: "Open Sans Condensed", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #fff;
+  background: transparent;
+  border: none;
+  border-right: 2px solid #000;
+  /* border-top: 2px solid #000; */
+  cursor: pointer;
+  margin: -2px 0 0 -2px;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+.wctab:last-child {
+  border-right: none;
+}
+.wctab.on {
+  background: #000;
+  color: #f2ede2;
+}
+.wctab:not(.on):hover {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+/* ================= Project carousel ================= */
+/* display:flex + justify-content:center actually centers the card —
+   the old justify-items/align-items pair did nothing here because
+   .wcarousel was never a grid or flex container, so the card was
+   rendering flush-left instead of centered. */
+.wcarousel {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* Smooth crossfade + soft scale, driven by transitionend in JS rather
+   than fixed timeouts — no directional slide, so there's nothing to
+   feel janky or mistimed. */
+.wc-card {
+  width: 100%;
+  max-width: 900px; /* was a fixed width:900px, which overflowed and forced horizontal scrolling on any viewport narrower than ~980px */
+  background: #000;
+  border-radius: 8px;
+  padding: 44px 60px 60px;
+  opacity: 1;
+  transform: scale(1);
+  margin-top: -100px;
+  transition:
+    opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.wc-card.fading {
+  opacity: 0;
+  transform: scale(0.985);
+}
+
+.wc-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 26px;
+}
+.wc-cat {
+  font-family: "Google Sans Flex", sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #fff;
+  font-size: clamp(1.9rem, 4.2vw, 3.75rem);
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+}
+.wc-count {
+  font-family: "Open Sans Condensed", sans-serif;
+  font-weight: 600;
+  color: #8a8a8a;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.wc-body {
+  display: grid;
+  grid-template-columns: minmax(0px, 42%) 1fr;
+  gap: 24px;
+  align-items: stretch;
+}
+
+/* Left column: dashed rule sits above the info card only — it does not
+   run under the thumbnail. The thumbnail stretches (grid align-items:
+   stretch) to match the combined height of the rule + info card. */
+.wc-left {
+  display: flex;
+  flex-direction: column;
+}
+.wc-divider {
+  border-top: 2px dashed rgba(255, 255, 255, 0.6);
+  margin-bottom: 18px;
+}
+
+.wc-info {
+  background: #f2ede2;
+  border-radius: 8px;
+  padding: 24px 26px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.wc-title {
+  font-family: "Google Sans Flex", sans-serif;
+  font-weight: 500;
+  font-size: 1.5rem;
+  color: #000;
+  margin-bottom: 10px;
+  line-height: 1.25;
+}
+.wc-desc {
+  font-family: "Google Sans Flex", sans-serif;
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.24;
+  color: #404043;
+  margin-bottom: 30px;
+}
+
+/* ---------------- Tool stack ----------------
+   A single ruler line runs the full width of the row; each tag's
+   triangle sits with its flat base flush against that line (base at
+   the tag-item's own top edge, same y as the line — nothing offset
+   between them), tip pointing down to the label underneath. */
+.wc-tags {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 9px;
+  row-gap: 18px;
+  margin: auto 0 22px;
+}
+.wc-tags::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  border-top: 3px solid #000;
+}
+.wc-tag-item {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.wc-tri {
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 9px solid #000;
+}
+.wc-tag-label {
+  margin-top: 8px;
+  font-family: "Open Sans Condensed", sans-serif;
+  font-weight: 600;
+  font-size: 0.75rem;
+  line-height: 1.24;
+  color: #000;
+  white-space: nowrap;
+}
+
+/* ---------------- View Work button ----------------
+   Full-width split button: label fills the remaining space, the arrow
+   segment is a fixed black square on the right. Only the arrow glyph
+   moves on hover — same principle as the edge arrows. */
+.wc-btn {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  border: 2px solid #000;
+  border-radius: 4px;
+  overflow: hidden;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.wc-btn-label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 0 22px;
+  height: 54px;
+  font-family: "Open Sans Condensed", sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #000;
+}
+
+.wc-arrow-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 68px;
+  height: 54px;
+  flex-shrink: 0;
+  background: #000;
+  border-left: 2px solid #000;
+  overflow: hidden;
+}
+.wc-arrow-ic {
+  display: block;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.wc-btn:hover .wc-arrow-ic {
+  transform: translateX(6px);
+}
+
+.wc-thumb {
+  background: #d9d9d9;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.wc-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.wc-thumb svg {
+  width: 28%;
+  height: 28%;
+  opacity: 0.35;
+}
+
+/* @media (max-width: 760px) { */
+@media (max-width: 760px) {
+  .work-arrow {
+    /* display: none; */
+    display: block;
+    /* width: 40px;
+    height: 74px; */
+    width: 38px;
+    height: 72px;
+  }
+  .work-arrow.left {
+    border-radius: 0 34px 34px 0;
+  }
+  .work-arrow.right {
+    border-radius: 34px 0 0 34px;
+  }
+  .work-arrow .arrow-ic {
+    width: 16px;          /* shrinks the glyph to match; height follows automatically from its viewBox ratio */
+    height: auto;
+  }
+
+  .work-top {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+  }
+  .work-head-wrap {
+    justify-content: flex-start;
+  }
+  .work-head {
+    width: min(320px, 70vw);
+  }
+  .wc-card {
+    width: calc(100% - 24px); /* was "100% -24px" (no space) - invalid calc(), silently ignored by the browser, leaving a stray unused "width: 90%" active instead */
+    padding: 28px 30px 32px;
+    margin-top: -40px; /* work-top stacks taller here (tabs above heading), so the same -100px pull-up used on desktop was riding the card up over the tabs */
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .wc-body {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .wc-thumb {
+    min-height: 200px;
+    order: -1;
+  }
+  /* Tabs */
+  .wctabs{
+    margin-top: 0px;
+    margin-bottom: 10px;
+    justify-content: center;
+  }
+  .wctab {
+    padding: 10px; 
+    text-align: center;
+    font-size: 8px;
+  }
+   /* View Work button */
+  .wc-btn-label {
+    height: 40px;
+    padding: 0 10px;
+    font-size: 0.7rem;
+  }
+  .wc-arrow-box {
+    width: 46px;
+    height: 40px;
+  }
+  .wc-arrow-ic {
+    width: 16px;
+    height: auto;
+  }
+
+  /* card texts */
+  .wc-cat{
+    font-size: 20px;
+  }
+  .wc-count{
+    font-size: 8px;
+  }
+  .wc-title{
+    font-size: 1.2rem;
+  }
+  .wc-desc{
+    font-size: 0.7rem;
+    margin-bottom: 20px;
+  }
+  .wc-tag-label{
+    font-size: 0.5rem;
+    /* font-weight: 900px; */
+  }
+  .wc-tags{
+    column-gap: 4px;
+  }
+  .wc-info{
+    /* gap: 10px; */
+    padding: 20px 18px;
+  }
+  .wc-thumb{
+    min-height: 180px;
+    /* order: -1; */
+  }
+}
+
+
+
+/* SKILLS */
+
+  .skills{
+    position: relative;
+    /* background: var(--bg); */
+    background: #4860FD;
+    color: var(--ink);
+    overflow: hidden;
+    padding-bottom: 0;
+    border-bottom: 3px solid #000;
+  }
+
+  .skills-inner{
+    position: relative;
+    height: 100vh;
+    min-height: 640px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 100px;
+    margin-top: 50px;
+  }
+
+  /* ---------- Title ---------- */
+  .skills-title{
+    position: absolute;
+    left: clamp(24px, 5vw, 70px);
+    top: clamp(20px, 6vh, 48px);
+    margin: 0;
+    /* z-index: 5; */
+    /* font-family: var(--ff-cond);
+    font-weight: 700;
+    font-size: clamp(100px, 12vw, 180px);
+    line-height: 0.95;
+    letter-spacing: 0.03em;
+    color: var(--paper);
+    display: flex; */
+    pointer-events: none;
+    margin-bottom: 50px;
+  }
+
+.skills-head{
+    display: block;
+    /* width: clamp(320px, 42vw, 620px); */
+    width: clamp(270px, 34vw, 500px);
+    height: auto;
+    overflow: visible; /* letters sit translateY(60px) below rest position pre-reveal */
+  }
+  .skills-letter{
+    opacity: 0;
+    transform: translateY(60px);
+    transition:
+      opacity 0.55s ease,
+      transform 0.55s ease;
+    will-change: transform, opacity;
+  }
+  .skills-letter.revealed{
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ---------- Rail (pin target) ---------- */
+  .skills-rail{
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    margin-top: 100px;
+  }
+
+  .skills-cards{
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--card-gap);
+    padding-left: min(38vw, 560px);
+    padding-right: 12vw;
+    will-change: transform;
+  }
+
+  /* Wire lives INSIDE the track so it travels with the cards as they
+     scroll horizontally, instead of stopping after one viewport-width. */
+  .skills-wire{
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 65px;
+    height: 20px;
+    background: var(--wire);
+    border-radius: 10px;
+    transform-origin: left center;
+    z-index: 0;
+  }
+
+  /* ---------- Card ----------
+     Split in two: `.skill-card` is a bare positioning shell that the
+     wave animation rotates as a whole (border, shadow and background
+     all live one level down, so they swing together). `.skill-card__frame`
+     is what actually looks like the card and is what the entrance
+     "drop onto the wire" animation tweens. Two different elements
+     means the two GSAP tweens never fight over the same `rotate`
+     property on the same node. */
+  .skill-card{
+    position: relative;
+    flex: 0 0 auto;
+    width: min(78vw, 340px);
+    transform-origin: top center;
+    will-change: transform;
+  }
+
+  .skill-card__frame{
+    position: relative;
+    border-radius: var(--card-radius);
+    border: 2px solid #000;
+    box-shadow: 0 4px 4px rgba(0,0,0,0.25);
+    overflow: hidden;
+    background: #000;
+    transform-origin: top center;
+    margin-bottom: 20px;
+  }
+
+  .skill-card__head{
+    position: relative;
+    padding: 34px 26px 26px;
+    min-height: 210px;
+  }
+
+  .skill-card__icon{
+    width: 78px;
+    height: 78px;
+    border-radius: 12px;
+    background: var(--accent);
+    margin: 0 auto 22px;
+  }
+  .skill-card__rivet{
+    position: absolute;
+    top: 73px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #2D3AE3;
+    border: 1.5px solid #000;
+  }
+
+  /* Pixel-checked against the reference PNG: the wire is NOT a
+     continuous bar across each card. At the icon's own left edge it's
+     plain icon colour — the wire only starts a little before the
+     card's centre and runs from there through the rest of the card,
+     across the gap, and partway into the NEXT card. So this is a
+     per-card element, not full-bleed, and it lives OUTSIDE
+     `.skill-card__frame` (a sibling, appended after it) so that:
+     (1) frame's `overflow:hidden` can't clip the part that overflows
+     into the next card, and (2) paint order — frame, then pipe, then
+     the NEXT card's own frame — makes the pipe sit on top of THIS
+     card's rivet/icon but get covered by the NEXT card's opaque body,
+     for free, with zero z-index. `calc(50% - 11px)` / `calc(100% +
+     var(--card-gap))` reproduce the reference's slightly-left-of-centre
+     start and land it exactly on the mirror point of the next card. */
+  .skill-card__pipe{
+    position: absolute;
+    left: calc(50% - 10px);
+    top: 65px;
+    width: calc(100% + var(--card-gap) + 100px); /* extends 40px further right */
+    height: 20px;
+    background: var(--wire);
+    border-radius: 10px;
+  }
+
+  .skill-card__code{
+    margin: 0;
+    text-align: left;
+    font-family: var(--ff-display);
+    font-weight: 800;
+    font-size: clamp(32px, 4.4vw, 52px);
+    line-height: 1;
+    color: var(--accent);
+  }
+
+  .skill-card__body{
+    background: var(--surface);
+    border-top: 2px solid #000;
+    padding: 26px 24px 28px;
+  }
+
+  .skill-card__title{
+    margin: 0 0 30px;
+    font-family: var(--ff-display);
+    font-weight: 600;
+    font-size: clamp(17px, 1.8vw, 21px);
+    line-height: 1.25;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+  }
+  .skill-card__title span{ display: block; }
+
+  .tag-row{
+    position: relative;
+    display: flex;
+    align-items: stretch; /* every .tag now spans the full 46px row */
+    justify-content: space-between;
+    gap: 8px;
+    height: 46px;
+    margin-bottom: 18px;
+    padding-right: 5px;
+    padding-left: 5px;
+  }
+  .tag-row::after{
+    content:'';
+    position:absolute;
+    left:0; right:0; top:50%;
+    height:2px;
+    background:#000;
+    transform: translateY(-50%);
+  }
+  /* Each .tag now stretches the full row height, so `top:50%` /
+     `bottom:50%` below always land exactly on the row's centre line —
+     no more padding-vs-line-height arithmetic that left the flag
+     triangle a couple of pixels short of the line. */
+  .tag{
+    position: relative;
+    font-family: var(--ff-cond);
+    font-weight: 700;
+    font-size: 9.5px;
+    line-height: 1.2;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    text-align: center;
+  }
+  .tag__label{
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+  .tag--below .tag__label{ bottom: 0; }
+  .tag--above .tag__label{ top: 0; }
+  /* Verified against the real vector paths in the Figma export: for
+     every tag, the triangle's FLAT edge sits on the row's centre line
+     and the APEX points AWAY, toward that tag's own label. I had this
+     backwards in the previous pass (apex on the line). */
+  .tag--below::before{
+    content:'';
+    position:absolute; top:50%; left:50%;
+    width: 11px; height: 10px;
+    background:#000;
+    clip-path: polygon(0% 0%, 100% 0%, 50% 100%); /* flat top, apex points down */
+    transform: translateX(-50%);
+  }
+  .tag--above::before{
+    content:'';
+    position:absolute; bottom:50%; left:50%;
+    width: 11px; height: 10px;
+    background:#000;
+    clip-path: polygon(0% 100%, 100% 100%, 50% 0%); /* flat bottom, apex points up */
+    transform: translateX(-50%);
+  }
+
+  .skill-card__divider{
+    border-top: 1.6px dashed #000;
+    margin-bottom: 18px;
+  }
+
+  .skill-card__footer{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+  }
+  .skill-card__footer span{
+    font-family: var(--ff-display);
+    font-weight: 200;
+    font-size: clamp(30px, 4.6vw, 44px);
+    line-height: 1;
+    color: #000;
+  }
+  .skill-card__footer svg{
+    flex: 0 0 auto;
+    width: 38px;
+    height: 16px;
+  }
+
+  /* ---------- Mobile: native swipeable row, no pin-jack ---------- */
+  @media (max-width: 760px){
+    .skills-head {
+    width: min(320px, 70vw);
+  }
+    .skills-inner{ 
+      height: auto; 
+      padding: 40px 0 56px; 
+      margin-top: 20px;
+      margin-bottom: 0px;
+      display:block; 
+    }
+    .skills-title{ 
+      position: static; 
+      margin: 0 0 28px; 
+      padding-left: 24px; }
+    .skills-rail{ 
+      margin-top: 0;
+      height: auto; 
+    }
+    /* .skills-wire{ display:none; } */
+    .skills-cards{
+      padding-left: 24px;
+      padding-right: 24px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      padding-bottom: 0px;
+    }
+    .skills-cards::-webkit-scrollbar{ display:none; }
+    .skill-card{ scroll-snap-align: center; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    /* .skills-title .letter, .skill-card, .skill-card__frame{ opacity: 1 !important; transform: none !important; } */
+    .skill-card, .skill-card__frame{ opacity: 1 !important; transform: none !important; }
+  }
+
+
+  /* ABOUT */
+/* ================= ABOUT SECTION =================
+   Heading-only placeholder for now — the rest of this section's
+   layout/content isn't designed yet, but nav already links to
+   #about, so this at least gives that link somewhere to land. Uses
+   your real "ABOUT" export, split into per-letter <path>s the same
+   way WORK and SKILLS are (A/B/O each combine their outer letterform
+   with its own counter/hole subpath into one <path>, same as how
+   WORK's own O/R already work). */
+
+.about-sec {
+  position: relative;
+  background: #000;
+  padding: 50px 0 200px;
+  overflow: hidden;
+  /* border-bottom: 3px solid #000; */
+}
+.about-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+/* Stacks your heading/text above the art layer — same trick hero
+   uses with .hero-inner (position:relative + z-index above the art's
+   z-index:0), just under a name that won't collide with the shared
+   .wrap class used elsewhere on the page. */
+.about-inner {
+  position: relative;
+  z-index: 2;
+}
+/* Continuous drift on the inner group, entrance fade+slide on the
+   outer wrapper (.cloud-in / .cloud-in-1 — already defined for the
+   hero). Reuses the existing floatCloud1 keyframes so the blob moves
+   exactly like hero's cloud1. The wave band gets neither: like
+   hero's cloud4, it stays fully visible and stable from frame one. */
+.ac-blob-float {
+  animation: floatCloud1 9s ease-in-out infinite;
+}
+
+.about-head-wrap {
+  display: flex;
+  justify-content: flex-start;
+}
+.about-head {
+  /* width: min(500px, 60vw); */
+  width: clamp(270px, 34vw, 500px);
+  height: auto;
+  /* padding-bottom: 50px; */
+}
+.about-letter {
+  opacity: 0;
+  transform: translateY(60px);
+  transition:
+    opacity 0.55s ease,
+    transform 0.55s ease;
+}
+.about-letter.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ================= ABOUT CARD ================= */
+.about-card {
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  margin: 56px auto 0;
+  background: #fff;
+  border: 3px solid #000;
+  border-radius: 24px;
+  padding: 44px 48px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 40px;
+}
+
+.about-card-divider {
+  position: absolute;
+  top: 44px;
+  bottom: 44px;
+  left: 50%;
+  border-left: 2px dashed #000;
+  transform: translateX(-1px);
+}
+
+.about-card-heading {
+  font-family: "Google Sans Flex", sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  line-height: 1.28;
+  color: #000;
+  margin-bottom: 20px;
+}
+
+.about-card-bio {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.about-card-bio p {
+  font-family: "Google Sans Flex", sans-serif;
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.28;
+  color: #404043;
+}
+
+.about-card-right {
+  display: flex;
+  flex-direction: column;
+}
+
+.about-card-certs-title {
+  font-family: "Google Sans Flex", sans-serif;
+  font-weight: 400;
+  font-size: 1.5rem;
+  line-height: 1.25;
+  color: #000;
+  margin-bottom: 16px;
+}
+.about-card-certs-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.about-card-certs-list li {
+  font-family: "Google Sans Flex", sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #000;
+}
+
+.about-card-connect {
+  margin-top: auto;
+  padding-top: 32px;
+}
+.about-card-connect-line {
+  font-family: "Google Sans Flex", sans-serif;
+  font-weight: 300;
+  font-size: 0.875rem;
+  line-height: 1.24;
+  color: #000;
+  margin-bottom: 14px;
+}
+
+.about-card-btn {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  border: 2px solid #000;
+  border-radius: 4px;
+  overflow: hidden;
+  text-decoration: none;
+  cursor: pointer;
+}
+.about-card-btn-label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 0 22px;
+  height: 54px;
+  font-family: "Open Sans Condensed", sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #000;
+}
+.about-card-btn-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 90px;
+  height: 54px;
+  flex-shrink: 0;
+  background: #000;
+  border-left: 2px solid #000;
+  overflow: hidden;
+}
+.about-card-btn-arrow svg {
+  display: block;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.about-card-btn:hover .about-card-btn-arrow svg {
+  transform: translateX(6px);
+}
+
+@media (max-width: 760px) {
+  .about-sec{
+    padding-top: 40px;
+    padding-bottom: 40px;
+  }
+  .about-head {
+    width: min(320px, 70vw);
+    /* padding-top: 10px; */
+  }
+  .about-card {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding: 28px 24px;
+    border-radius: 16px;
+    margin-top: 32px;
+  }
+  .about-card-divider {
+    display: none;
+  }
+  .about-card-right {
+    padding-top: 24px;
+    border-top: 2px dashed #000;
+  }
+  .about-card-heading {
+    font-size: 1.6rem;
+  }
+  .about-card-bio p {
+    font-size: 0.8rem;
+  }
+  .about-card-certs-title {
+    font-size: 1.2rem;
+  }
+  .about-card-certs-list li {
+    font-size: 0.85rem;
+  }
+  .about-card-btn-label {
+    height: 46px;
+    padding: 0 16px;
+    font-size: 0.85rem;
+  }
+  .about-card-btn-arrow {
+    width: 56px;
+    height: 46px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ac-blob-float {
+    animation: none;
+  }
+}
+
+
+/* NEW GUITAR WITH TEXT */
+.guitar{
+  background-color: #000;
+}
+  .guitar-wrap {
+  width: 102%;
+  margin: 0 auto;      /* centers it if the section is wider */
+}
+
+#guitarSvg {
+  display: block;      /* removes the few px of inline whitespace under it */
+  width: 100%;
+  height: auto;         /* height follows the viewBox's aspect ratio */
+}
+
+  .string-hit {
+    cursor: pointer;
+    touch-action: none;
+  }
+  .letter {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.55s ease, transform 0.55s ease;
+  }
+  .letter.revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+ .csec {
+  background-color: #2b47ff;
+  padding: 20px 60px 40px;
+  text-align: right;
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+  margin-top: -50px;
+}
+
+.csec h2 {
+  font-family: "Google Sans Flex", sans-serif;
+  margin-bottom: 20px;
+  font-size: 1.9rem;
+}
+
+.csec h2 a {
+  color: inherit; /* keeps it white, matches current look */
+  text-decoration: none;
+  font: inherit;  /* now correctly inherits font-family/size from h2 above */
+  transition: color 0.3s ease;
+  cursor: pointer;
+}
+
+.csec h2 a:hover {
+  color: #8ed4fd;
+}
+
+.csec-link {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap; /* prevents overflow if links can't fit on one line */
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.csec-link a {
+  color: #fff;
+  text-decoration: none;
+  font-family: "Google Sans Flex", sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: color 0.3s ease;
+  cursor: pointer;
+}
+
+.csec-link a:hover {
+  color: #8ed4fd;
+}
+
+/* Tablet */
+@media (max-width: 860px) {
+  .csec {
+    padding: 80px 30px 30px;
+    text-align: center;
+    margin-top: -8px;
+  }
+
+  .csec h2 {
+    font-size: 1.5rem;
+  }
+
+  .csec-link {
+    justify-content: center;
+  }
+
+  .csec-link a {
+    font-size: 0.85rem;
+  }
+  .guitar-wrap{
+    padding-top: 30px;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .csec {
+    padding: 20px 20px 24px;
+    margin-top: -8px;
+  }
+
+  .csec h2 {
+    font-size: 1.2rem;
+    word-break: break-word; /* prevents long email from overflowing */
+  }
+
+  .csec-link {
+    gap: 10px;
+  }
+
+  .csec-link a {
+    font-size: 0.75rem;
+  }
+
+  .guitar-wrap{
+    padding-top: 20px;
+  }
+}
+
+  
+
+
+/* FOOTER */
+.fsec {
+  padding: 20px 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.fsec .dp-logo {
+  width: 100px;
+  height: auto;
+}
+
+.csub {
+  font-size: 0.94rem;
+  color: #fff;
+  margin-bottom: 42px;
+  max-width: 380px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+footer {
+  width: 100%;
+  background-color: #000;
+  padding-top: 0;
+  padding-bottom: 80px;
+}
+
+.foot {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 10px;
+}
+
+.foot p,
+.foot a {
+  font-family: "Google Sans Flex", sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #fff;
+  letter-spacing: 0.06em;
+}
+
+.foot a {
+  color: var(--ac);
+}
+
+.flogo-bottom {
+  margin-top: 50px;
+  padding: 0;
+}
+
+/* Logo-as-link: hover feedback */
+.flogo-link {
+  display: inline-block;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.flogo-link:hover {
+  transform: translateY(-4px);
+  opacity: 0.85;
+}
+
+/* Logo-as-link: hover feedback */
+.nlogo-link {
+  display: inline-block;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.nlogo-link:hover {
+  /* transform: translateY(-4px); */
+  opacity: 0.7;
+}
+
+@media (max-width: 860px) {
+  .wrap {
+    padding: 0 20px;
+  }
+
+  .fsec .dp-logo {
+    width: 80px;
+    margin-top: 10px;
+  }
+}
