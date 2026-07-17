@@ -624,8 +624,8 @@ nav.nav-hidden {
   opacity: 0;
   transform: translateY(60px);
   transition:
-    opacity 0.55s ease,
-    transform 0.55s ease;
+    opacity 0.5s ease,
+    transform 0.3s ease;
 }
 .work-letter.revealed {
   opacity: 1;
@@ -1183,8 +1183,8 @@ nav.nav-hidden {
     opacity: 0;
     transform: translateY(60px);
     transition:
-      opacity 0.55s ease,
-      transform 0.55s ease;
+      opacity 0.5s ease,
+      transform 0.3s ease;
     will-change: transform, opacity;
   }
   .skills-letter.revealed{
@@ -1531,8 +1531,8 @@ nav.nav-hidden {
   opacity: 0;
   transform: translateY(60px);
   transition:
-    opacity 0.55s ease,
-    transform 0.55s ease;
+    opacity 0.5s ease,
+    transform 0.3s ease;
 }
 .about-letter.revealed {
   opacity: 1;
