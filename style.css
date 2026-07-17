@@ -536,14 +536,6 @@ nav.nav-hidden {
 
 
 @media (min-width: 481px) and (max-width: 860px){
-  .hero-inner {
-    top: 80px;
-    margin-left: 0;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    padding: 40px 24px;
-  }
   .hero-copy{
     font-size: 1rem;
   }
