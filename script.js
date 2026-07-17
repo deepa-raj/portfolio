@@ -53,15 +53,15 @@
       var gold = Math.random() < .5;
       var size = boosted ? 2 + Math.random() * 2 : 3 + Math.random() * 2;
       var bg = gold
-        ? 'radial-gradient(circle, #F5DFA3 0%, #fff7dd 70%, rgba(255, 205, 67, 0) 100%)'
-        : 'radial-gradient(circle, #6fcbf0 0%, #76efff 55%, rgba(204, 252, 255, 0) 60%)';
+        ? 'radial-gradient(circle, #F5DFA3 0%, #fcfa98 70%, rgba(255, 205, 67, 0) 100%)'
+        : 'radial-gradient(circle, #6fcbf0 0%, #76efff 60%, rgba(204, 252, 255, 0) 60%)';
       el.style.left = px + 'px';
       el.style.top = py + 'px';
       el.style.width = size + 'px';
       el.style.height = size + 'px';
       el.style.margin = (-size / 2) + 'px 0 0 ' + (-size / 2) + 'px';
       el.style.background = bg;
-      el.style.opacity = boosted ? '0.9' : '0.55';
+      el.style.opacity = boosted ? '0.8' : '0.9';
       el.style.transform = 'scale(1)';
       el.style.transition = 'opacity 1.1s ease-out, transform 1.1s ease-out';
       document.body.appendChild(el);
@@ -928,20 +928,23 @@ if (workSection && workLetters.length) {
 /* ------------------------------------------------------------
      4. WIRE + CARD WAVE ANIMATION (GSAP/ScrollTrigger)
      ------------------------------------------------------------ */
+  /* ------------------------------------------------------------
+     4. WIRE + CARD WAVE ANIMATION (GSAP/ScrollTrigger)
+     Same pinned horizontal scroll + wave animation at every screen
+     size now — previously split via gsap.matchMedia() into a
+     >=900px pin-jack version and a lighter <900px fade-in-place
+     fallback. Removed that split; this now runs unconditionally.
+     ------------------------------------------------------------ */
   const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   if (window.gsap && !prefersReduced) {
     gsap.registerPlugin(ScrollTrigger);
 
-    // Card titles/tags use custom web fonts (Sora / Google Sans Flex). If they're
-    // still loading when scrollWidth is first measured below, a later font swap
-    // can quietly shift the row's width and throw off the pin's end point —
-    // re-measuring once fonts are actually ready keeps that in sync.
     if (document.fonts && document.fonts.ready) {
       document.fonts.ready.then(() => ScrollTrigger.refresh());
     }
+    window.addEventListener('load', () => ScrollTrigger.refresh());
 
-    // Wire draws in
     gsap.set('.skills-wire', { scaleX: 0 });
     gsap.to('.skills-wire', {
       scaleX: 1,
@@ -954,101 +957,151 @@ if (workSection && workLetters.length) {
       },
     });
 
-    const mm = gsap.matchMedia();
+    const cards = gsap.utils.toArray('.skill-card');
+    const frames = cards.map(c => c.querySelector('.skill-card__frame'));
 
-    mm.add('(min-width: 900px)', () => {
-      const cards = gsap.utils.toArray('.skill-card');
-      const frames = cards.map(c => c.querySelector('.skill-card__frame'));
+    gsap.set(cards, { transformOrigin: 'top center' });
 
-      gsap.set(cards, { transformOrigin: 'top center' });
+    const rotators = cards.map((c, i) =>
+      gsap.quickTo(c, 'rotate', { duration: 0.45 + i * 0.055, ease: 'elastic.out(1, 0.32)' })
+    );
+    let idleTimer;
 
-      // A quickTo rotator per card, applied to the SHELL (.skill-card),
-      // never to the frame — the frame is entrance-animation territory.
-      // Keeping them on separate elements means a fast scroll into a
-      // card that's mid-entrance can't cause the two tweens to overwrite
-      // each other on the same `rotate` property.
-      // Duration (and therefore how long the elastic ease keeps
-      // oscillating) increases with index, so the same nudge reaches
-      // later cards a beat later and keeps swinging longer — that lag
-      // is what reads as a wave rippling down the row.
-      const rotators = cards.map((c, i) =>
-        gsap.quickTo(c, 'rotate', { duration: 0.45 + i * 0.055, ease: 'elastic.out(1, 0.32)' })
-      );
-      let idleTimer;
-
-      // Pin the section and translate the card row horizontally as
-      // the user scrolls down — same mechanic Dave Holloway's site uses.
-      const scrollTween = gsap.to(track, {
-        x: () => -(track.scrollWidth - document.documentElement.clientWidth + 40),
-        ease: 'none',
-        scrollTrigger: {
-          trigger: '.skills-inner',
-          start: 'top top',
-          end: () => '+=' + (track.scrollWidth - document.documentElement.clientWidth + 40),
-          pin: true,
-          // pinType: 'transform',
-          // anticipatePin: 1,
-          scrub: 1,
-          invalidateOnRefresh: true,
-          onUpdate(self) {
-            // Turn scroll speed into a rotation impulse, like flicking
-            // a row of hanging cards — faster scroll = wider swing, and
-            // the elastic ease on each rotator overshoots/corrects on
-            // its own delayed schedule, which is what produces the
-            // alternating tilt-left/tilt-right wave along the row.
-            const v = gsap.utils.clamp(-16, 16, self.getVelocity() / 180);
-            rotators.forEach((set, i) => set(v * (1 - i * 0.06)));
-            clearTimeout(idleTimer);
-            idleTimer = setTimeout(() => rotators.forEach((set) => set(0)), 140);
-          },
+    const scrollTween = gsap.to(track, {
+      x: () => -(track.scrollWidth - document.documentElement.clientWidth + 40),
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '.skills-inner',
+        start: 'top top',
+        end: () => '+=' + (track.scrollWidth - document.documentElement.clientWidth + 40),
+        pin: true,
+        // pinType: 'transform',
+        // anticipatePin: 1,
+        scrub: 1,
+        invalidateOnRefresh: true,
+        onUpdate(self) {
+          const v = gsap.utils.clamp(-16, 16, self.getVelocity() / 180);
+          rotators.forEach((set, i) => set(v * (1 - i * 0.06)));
+          clearTimeout(idleTimer);
+          idleTimer = setTimeout(() => rotators.forEach((set) => set(0)), 140);
         },
-      });
-
-      // Each card's frame swings onto the wire like a pendulum let go
-      // from an angle — elastic.out overshoots past 0 and rocks back
-      // a couple of times before settling, rather than just easing
-      // down once — as it first enters the pinned viewport, using the
-      // horizontal scroll itself as the trigger's container animation.
-      cards.forEach((card, i) => {
-        gsap.fromTo(frames[i],
-          { autoAlpha: 0, y: -90, rotate: i % 2 === 0 ? -20 : 20 },
-          {
-            autoAlpha: 1, y: 0, rotate: 0,
-            duration: 1.4,
-            ease: 'elastic.out(1, 0.45)',
-            scrollTrigger: {
-              trigger: card,
-              containerAnimation: scrollTween,
-              start: 'left 88%',
-              toggleActions: 'play none none reverse',
-            },
-          }
-        );
-      });
-
-      return () => { /* gsap.matchMedia auto-reverts on cleanup */ };
+      },
     });
 
-    mm.add('(max-width: 899px)', () => {
-      // No scroll-jacking on small/touch screens — cards fade/slide
-      // up in place as they're scrolled to naturally, with a lighter
-      // version of the same swing (shorter throw, since there's no
-      // horizontal scroll wave to play off of here).
-      gsap.utils.toArray('.skill-card').forEach((card, i) => {
-        const frame = card.querySelector('.skill-card__frame');
-        gsap.fromTo(frame,
-          { autoAlpha: 0, y: 40, rotate: i % 2 === 0 ? -10 : 10 },
-          {
-            autoAlpha: 1, y: 0, rotate: 0, duration: 1,
-            ease: 'elastic.out(1, 0.5)',
-            scrollTrigger: { trigger: card, start: 'top 90%' },
-          }
-        );
-      });
-      return () => {};
+    cards.forEach((card, i) => {
+      gsap.fromTo(frames[i],
+        { autoAlpha: 0, y: -90, rotate: i % 2 === 0 ? -20 : 20 },
+        {
+          autoAlpha: 1, y: 0, rotate: 0,
+          duration: 1.4,
+          ease: 'elastic.out(1, 0.45)',
+          scrollTrigger: {
+            trigger: card,
+            containerAnimation: scrollTween,
+            start: 'left 88%',
+            toggleActions: 'play none none reverse',
+          },
+        }
+      );
     });
   }
-})();
+
+    // const mm = gsap.matchMedia();
+
+    // mm.add('(min-width: 900px)', () => {
+    //   const cards = gsap.utils.toArray('.skill-card');
+    //   const frames = cards.map(c => c.querySelector('.skill-card__frame'));
+
+    //   gsap.set(cards, { transformOrigin: 'top center' });
+
+    //   // A quickTo rotator per card, applied to the SHELL (.skill-card),
+    //   // never to the frame — the frame is entrance-animation territory.
+    //   // Keeping them on separate elements means a fast scroll into a
+    //   // card that's mid-entrance can't cause the two tweens to overwrite
+    //   // each other on the same `rotate` property.
+    //   // Duration (and therefore how long the elastic ease keeps
+    //   // oscillating) increases with index, so the same nudge reaches
+    //   // later cards a beat later and keeps swinging longer — that lag
+    //   // is what reads as a wave rippling down the row.
+    //   const rotators = cards.map((c, i) =>
+    //     gsap.quickTo(c, 'rotate', { duration: 0.45 + i * 0.055, ease: 'elastic.out(1, 0.32)' })
+    //   );
+    //   let idleTimer;
+
+    //   // Pin the section and translate the card row horizontally as
+    //   // the user scrolls down — same mechanic Dave Holloway's site uses.
+    //   const scrollTween = gsap.to(track, {
+    //     x: () => -(track.scrollWidth - document.documentElement.clientWidth + 40),
+    //     ease: 'none',
+    //     scrollTrigger: {
+    //       trigger: '.skills-inner',
+    //       start: 'top top',
+    //       end: () => '+=' + (track.scrollWidth - document.documentElement.clientWidth + 40),
+    //       pin: true,
+    //       // pinType: 'transform',
+    //       // anticipatePin: 1,
+    //       scrub: 1,
+    //       invalidateOnRefresh: true,
+    //       onUpdate(self) {
+    //         // Turn scroll speed into a rotation impulse, like flicking
+    //         // a row of hanging cards — faster scroll = wider swing, and
+    //         // the elastic ease on each rotator overshoots/corrects on
+    //         // its own delayed schedule, which is what produces the
+    //         // alternating tilt-left/tilt-right wave along the row.
+    //         const v = gsap.utils.clamp(-16, 16, self.getVelocity() / 180);
+    //         rotators.forEach((set, i) => set(v * (1 - i * 0.06)));
+    //         clearTimeout(idleTimer);
+    //         idleTimer = setTimeout(() => rotators.forEach((set) => set(0)), 140);
+    //       },
+    //     },
+    //   });
+
+    //   // Each card's frame swings onto the wire like a pendulum let go
+    //   // from an angle — elastic.out overshoots past 0 and rocks back
+    //   // a couple of times before settling, rather than just easing
+    //   // down once — as it first enters the pinned viewport, using the
+    //   // horizontal scroll itself as the trigger's container animation.
+    //   cards.forEach((card, i) => {
+    //     gsap.fromTo(frames[i],
+    //       { autoAlpha: 0, y: -90, rotate: i % 2 === 0 ? -20 : 20 },
+    //       {
+    //         autoAlpha: 1, y: 0, rotate: 0,
+    //         duration: 1.4,
+    //         ease: 'elastic.out(1, 0.45)',
+    //         scrollTrigger: {
+    //           trigger: card,
+    //           containerAnimation: scrollTween,
+    //           start: 'left 88%',
+    //           toggleActions: 'play none none reverse',
+    //         },
+    //       }
+    //     );
+    //   });
+
+    //   return () => { /* gsap.matchMedia auto-reverts on cleanup */ };
+    // });
+
+    // mm.add('(max-width: 899px)', () => {
+    //   // No scroll-jacking on small/touch screens — cards fade/slide
+    //   // up in place as they're scrolled to naturally, with a lighter
+    //   // version of the same swing (shorter throw, since there's no
+    //   // horizontal scroll wave to play off of here).
+    //   gsap.utils.toArray('.skill-card').forEach((card, i) => {
+    //     const frame = card.querySelector('.skill-card__frame');
+    //     gsap.fromTo(frame,
+    //       { autoAlpha: 0, y: 40, rotate: i % 2 === 0 ? -10 : 10 },
+    //       {
+    //         autoAlpha: 1, y: 0, rotate: 0, duration: 1,
+    //         ease: 'elastic.out(1, 0.5)',
+    //         scrollTrigger: { trigger: card, start: 'top 90%' },
+    //       }
+    //     );
+    //   });
+    //   return () => {};
+    // });
+  // }
+}
+)();
 
 
 

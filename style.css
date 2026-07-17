@@ -1,3 +1,10 @@
+
+
+/* @media (min-width: 1201px)  */ /* desktop/wide */ 
+/* @media (min-width: 861px) and (max-width: 1200px)  */ /* laptop */
+/* @media (min-width: 481px) and (max-width: 860px)   */ /* tablet */
+/* @media (max-width: 480px)  */ /* phone */
+
 :root {
   --hero-bg: #1f3aec;
   --nav-bg: #2b47ff;
@@ -219,12 +226,12 @@ nav.nav-hidden {
   transform: translateY(-7px) rotate(-45deg);
 }
 
-@media (max-width: 860px) {
+@media (max-width: 768px) {
   nav{
     padding: 0 24px;
   }
   .dp-logo{
-    width: 40px;
+    width: 45px;
   }
   .nav-toggle {
     display: flex;
@@ -528,7 +535,7 @@ nav.nav-hidden {
 }
 
 
-@media (max-width: 700px) {
+@media (max-width: 900px) {
   .hero-inner {
     top: 100px;
     margin-left: 0;
@@ -926,13 +933,94 @@ nav.nav-hidden {
   opacity: 0.35;
 }
 
-/* @media (max-width: 760px) { */
-@media (max-width: 760px) {
+
+/* @media (min-width: 481px) and (max-width: 900px){ */
+@media (min-width: 481px) and (max-width: 860px){
+  .work-sec{
+    padding-top: 50px;
+    padding-bottom: 120px;
+  }
+  .work-top {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+  }
+  .work-head-wrap {
+    justify-content: flex-start;
+  }
+  .work-head {
+    width: min(320px, 70vw);
+  }
+  .wc-card {
+    width: calc(100% - 24px); /* was "100% -24px" (no space) - invalid calc(), silently ignored by the browser, leaving a stray unused "width: 90%" active instead */
+    padding: 28px 30px 32px;
+    margin-top: -40px; /* work-top stacks taller here (tabs above heading), so the same -100px pull-up used on desktop was riding the card up over the tabs */
+    margin-left: auto;
+    margin-right: auto;
+  }
+  /* .wc-body {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  } */
+  .wc-thumb {
+    min-height: 80px;
+    order: -1;
+  }
+  /* Tabs */
+  .wctabs{
+    margin-top: 20px;
+    margin-bottom: 10px;
+    justify-content: start;
+  }
+  .wctab {
+    padding: 10px 15px; 
+    text-align: center;
+    font-size: 11px;
+  }
+   /* View Work button */
+  .wc-btn-label {
+    height: 40px;
+    padding: 0 10px;
+    font-size: 0.7rem;
+  }
+  .wc-arrow-box {
+    width: 46px;
+    height: 40px;
+  }
+  .wc-arrow-ic {
+    width: 16px;
+    height: auto;
+  }
+
+  /* card texts */
+  .wc-cat{
+    font-size: 30px;
+  }
+  .wc-count{
+    font-size: 12px;
+  }
+  .wc-title{
+    font-size: 1.4rem;
+  }
+  .wc-desc{
+    font-size: 0.8rem;
+    margin-bottom: 20px;
+  }
+  .wc-tag-label{
+    font-size: 0.7rem;
+    /* font-weight: 900px; */
+  }
+  .wc-tags{
+    column-gap: 6px;
+  }
+  .wc-info{
+    /* gap: 10px; */
+    padding: 20px 18px;
+  }
+}
+
+@media (max-width: 480px) {
   .work-arrow {
-    /* display: none; */
     display: block;
-    /* width: 40px;
-    height: 74px; */
     width: 38px;
     height: 72px;
   }
@@ -1023,11 +1111,9 @@ nav.nav-hidden {
     /* gap: 10px; */
     padding: 20px 18px;
   }
-  .wc-thumb{
-    min-height: 180px;
-    /* order: -1; */
-  }
 }
+
+
 
 
 
@@ -1314,7 +1400,8 @@ nav.nav-hidden {
   }
 
   /* ---------- Mobile: native swipeable row, no pin-jack ---------- */
-  @media (max-width: 760px){
+
+  /* @media (max-width: 480px){
     .skills-head {
     width: min(320px, 70vw);
   }
@@ -1333,7 +1420,6 @@ nav.nav-hidden {
       margin-top: 0;
       height: auto; 
     }
-    /* .skills-wire{ display:none; } */
     .skills-cards{
       padding-left: 24px;
       padding-right: 24px;
@@ -1344,7 +1430,7 @@ nav.nav-hidden {
     }
     .skills-cards::-webkit-scrollbar{ display:none; }
     .skill-card{ scroll-snap-align: center; }
-  }
+  } */
 
   @media (prefers-reduced-motion: reduce){
     /* .skills-title .letter, .skill-card, .skill-card__frame{ opacity: 1 !important; transform: none !important; } */
