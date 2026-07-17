@@ -535,7 +535,21 @@ nav.nav-hidden {
 }
 
 
-@media (max-width: 900px) {
+@media (min-width: 481px) and (max-width: 860px){
+  .hero-inner {
+    top: 80px;
+    margin-left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 40px 24px;
+  }
+  .hero-copy{
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
   .hero-inner {
     top: 100px;
     margin-left: 0;
@@ -1125,7 +1139,7 @@ nav.nav-hidden {
     background: #4860FD;
     color: var(--ink);
     overflow: hidden;
-    padding-bottom: 0;
+    padding-bottom: 20;
     border-bottom: 3px solid #000;
   }
 
@@ -1145,6 +1159,7 @@ nav.nav-hidden {
     left: clamp(24px, 5vw, 70px);
     top: clamp(20px, 6vh, 48px);
     margin: 0;
+    padding-top: 40px;
     /* z-index: 5; */
     /* font-family: var(--ff-cond);
     font-weight: 700;
@@ -1400,6 +1415,9 @@ nav.nav-hidden {
   }
 
   /* ---------- Mobile: native swipeable row, no pin-jack ---------- */
+/* @media (min-width: 481px) and (max-width: 860px){
+
+} */
 
   /* @media (max-width: 480px){
     .skills-head {
