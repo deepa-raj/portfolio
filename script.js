@@ -122,17 +122,37 @@
     var scrollResetTimer = null;
     var lastSpawnX = x, lastSpawnY = y;
     var interacting = false;
+    var wanderInterval = null;
 
     function pickWanderTarget() {
-      var margin = 50;
-      targetX = margin + Math.random() * Math.max(1, window.innerWidth - margin * 2);
-      targetY = margin + Math.random() * Math.max(1, window.innerHeight - margin * 2);
+      // var margin = 50;
+      // targetX = margin + Math.random() * Math.max(1, window.innerWidth - margin * 2);
+      // targetY = margin + Math.random() * Math.max(1, window.innerHeight - margin * 2);
+      var swing = 80;
+      var margin = 40;
+      var nx = x + (Math.random() - 0.5) * swing * 2;
+      var ny = y + (Math.random() - 0.5) * swing * 2;
+      targetX = Math.max(margin, Math.min(window.innerWidth - margin, nx));
+      targetY = Math.max(margin, Math.min(window.innerHeight - margin, ny));
+    }
+
+    function startWander() {
+      if (wanderInterval) return;   // scroll fires many times per gesture — this makes every call after the first a no-op instead of resetting the swing
+      pickWanderTarget();
+      wanderInterval = setInterval(pickWanderTarget, 700 + Math.random() * 400);
+    }
+
+    function stopWander() {
+      clearInterval(wanderInterval);
+      wanderInterval = null;
+      targetX = x;   // freeze exactly where it currently sits — not wherever it was still drifting toward
+      targetY = y;
     }
 
     if (isTouch) {
       bfc.style.opacity = '1';
-      pickWanderTarget();
-      setInterval(pickWanderTarget, 2200 + Math.random() * 1500);
+      // pickWanderTarget();
+      // setInterval(pickWanderTarget, 2200 + Math.random() * 1500);
     } else {
       window.addEventListener('mousemove', function (e) {
         targetX = e.clientX;
@@ -154,9 +174,13 @@
       scrollTarget = currentScrollY > lastScrollY ? 5 : -5;
       lastScrollY = currentScrollY;
       clearTimeout(scrollResetTimer);
-      scrollResetTimer = setTimeout(function () { scrollTarget = 0; }, 150);
+      scrollResetTimer = setTimeout(function () 
+      { scrollTarget = 0;  
+        if (isTouch) stopWander();   // scrolling has actually stopped (150ms since the last event) — freeze in place
+      }, 150);
 
-      if (isTouch) pickWanderTarget();
+      // if (isTouch) pickWanderTarget();
+      if (isTouch) startWander();
     }, { passive: true });
 
     function spawnBeam(px, py, boosted) {
