@@ -122,26 +122,36 @@
     var scrollResetTimer = null;
     var lastSpawnX = x, lastSpawnY = y;
     var interacting = false;
+
+    // Touch-device ambient wander: runs continuously (not tied to scrolling),
+    // swinging around a soft anchor point that itself drifts to a new nearby
+    // spot every few seconds — that's the "here and there" part.
     var isWandering = false;
     var wanderAnchorX = x, wanderAnchorY = y;
     var wanderStartTime = 0;
+    var WANDER_REANCHOR_MS = 4000;
 
-    function startWander() {
-      if (isWandering) return;   // scroll fires many times per gesture — this makes every call after the first a no-op instead of resetting the swing
-      isWandering = true;
-      wanderAnchorX = x;         // swing begins from wherever the butterfly currently sits
-      wanderAnchorY = y;
-      wanderStartTime = performance.now();
+    function reanchorWander() {
+      var margin = 60;
+      var driftRadius = 120;
+      var nx = wanderAnchorX + (Math.random() - 0.5) * driftRadius * 2;
+      var ny = wanderAnchorY + (Math.random() - 0.5) * driftRadius * 2;
+      wanderAnchorX = Math.max(margin, Math.min(window.innerWidth - margin, nx));
+      wanderAnchorY = Math.max(margin, Math.min(window.innerHeight - margin, ny));
+      wanderStartTime = performance.now(); // reset sine phase so the new anchor doesn't show up as a jump
     }
 
-    function stopWander() {
-      isWandering = false;
-      targetX = x;   // freeze exactly where it currently sits — not wherever it was still drifting toward
-      targetY = y;
+    function startWander() {
+      isWandering = true;
+      wanderAnchorX = x;
+      wanderAnchorY = y;
+      wanderStartTime = performance.now();
+      setInterval(reanchorWander, WANDER_REANCHOR_MS);
     }
 
     if (isTouch) {
       bfc.style.opacity = '1';
+      startWander();
     } else {
       window.addEventListener('mousemove', function (e) {
         targetX = e.clientX;
@@ -160,15 +170,10 @@
 
     window.addEventListener('scroll', function () {
       var currentScrollY = window.scrollY;
-      scrollTarget = currentScrollY > lastScrollY ? 10 : -10;
+      scrollTarget = currentScrollY > lastScrollY ? 5 : -5;
       lastScrollY = currentScrollY;
       clearTimeout(scrollResetTimer);
-      scrollResetTimer = setTimeout(function () 
-      { scrollTarget = 0;  
-        if (isTouch) stopWander();   // scrolling has actually stopped (150ms since the last event) — freeze in place
-      }, 150);
-
-      if (isTouch) startWander();
+      scrollResetTimer = setTimeout(function () { scrollTarget = 0; }, 150);
     }, { passive: true });
 
     function spawnBeam(px, py, boosted) {
@@ -209,7 +214,7 @@
     function tick() {
       if (isTouch && isWandering) {
         var t = (performance.now() - wanderStartTime) / 1000;
-        var margin = 30;
+        var margin = 40;
         // two sine waves per axis, different frequencies, no phase offset —
         // starts at exactly 0 offset (so resuming from a frozen spot has
         // zero jump) and drifts into an organic figure-eight-ish swing
@@ -221,11 +226,11 @@
       
       var dx = targetX - x;
       var dy = targetY - y;
-      x += dx * 0.12;
-      y += dy * 0.12;
+      x += dx * 0.18;
+      y += dy * 0.18;
 
       var lean = Math.max(-20, Math.min(20, dx * 0.6));
-      mouseTilt += (lean - mouseTilt) * 0.5;
+      mouseTilt += (lean - mouseTilt) * 0.15;
       scrollTilt += (scrollTarget - scrollTilt) * 0.12;
 
       var rotation = mouseTilt + scrollTilt;
