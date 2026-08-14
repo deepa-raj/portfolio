@@ -106,7 +106,6 @@
 // })();
 
 // Butterfly cursor
-// Butterfly cursor
 (function () {
   function initButterflyCursor() {
     var bfc = document.getElementById('bfc');
@@ -161,7 +160,7 @@
 
     window.addEventListener('scroll', function () {
       var currentScrollY = window.scrollY;
-      scrollTarget = currentScrollY > lastScrollY ? 5 : -5;
+      scrollTarget = currentScrollY > lastScrollY ? 10 : -10;
       lastScrollY = currentScrollY;
       clearTimeout(scrollResetTimer);
       scrollResetTimer = setTimeout(function () 
@@ -210,7 +209,7 @@
     function tick() {
       if (isTouch && isWandering) {
         var t = (performance.now() - wanderStartTime) / 1000;
-        var margin = 40;
+        var margin = 30;
         // two sine waves per axis, different frequencies, no phase offset —
         // starts at exactly 0 offset (so resuming from a frozen spot has
         // zero jump) and drifts into an organic figure-eight-ish swing
@@ -222,11 +221,11 @@
       
       var dx = targetX - x;
       var dy = targetY - y;
-      x += dx * 0.18;
-      y += dy * 0.18;
+      x += dx * 0.12;
+      y += dy * 0.12;
 
       var lean = Math.max(-20, Math.min(20, dx * 0.6));
-      mouseTilt += (lean - mouseTilt) * 0.15;
+      mouseTilt += (lean - mouseTilt) * 0.5;
       scrollTilt += (scrollTarget - scrollTilt) * 0.12;
 
       var rotation = mouseTilt + scrollTilt;
@@ -308,6 +307,7 @@
     { passive: true }
   );
 })();
+
 
 
 
