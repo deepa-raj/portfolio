@@ -122,6 +122,9 @@
     var scrollResetTimer = null;
     var lastSpawnX = x, lastSpawnY = y;
     var interacting = false;
+    var isWandering = false;
+    var wanderAnchorX = x, wanderAnchorY = y;
+    var wanderStartTime = 0;
     var wanderInterval = null;
 
     function pickWanderTarget() {
@@ -138,13 +141,18 @@
 
     function startWander() {
       if (wanderInterval) return;   // scroll fires many times per gesture — this makes every call after the first a no-op instead of resetting the swing
-      pickWanderTarget();
-      wanderInterval = setInterval(pickWanderTarget, 700 + Math.random() * 400);
+      // pickWanderTarget();
+      // wanderInterval = setInterval(pickWanderTarget, 700 + Math.random() * 400);
+      isWandering = true;
+        wanderAnchorX = x;         // swing begins from wherever the butterfly currently sits
+        wanderAnchorY = y;
+        wanderStartTime = performance.now();
     }
 
     function stopWander() {
-      clearInterval(wanderInterval);
-      wanderInterval = null;
+      // clearInterval(wanderInterval);
+      // wanderInterval = null;
+      isWandering = false;
       targetX = x;   // freeze exactly where it currently sits — not wherever it was still drifting toward
       targetY = y;
     }
@@ -184,8 +192,8 @@
     }, { passive: true });
 
     function spawnBeam(px, py, boosted) {
-      var count = boosted ? 10 + Math.floor(Math.random() * 10) : 6 + Math.floor(Math.random() * 20);
-      var spread = boosted ? 100 : 100;
+      var count = boosted ? 20 + Math.floor(Math.random() * 5) : 6 + Math.floor(Math.random() * 20);
+      var spread = boosted ? 120 : 120;
       for (var i = 0; i < count; i++) {
         var angle = Math.random() * Math.PI * 2;
         var radius = Math.random() * spread;
@@ -219,10 +227,24 @@
     }
 
     function tick() {
+      if (isTouch && isWandering) {
+        var t = (performance.now() - wanderStartTime) / 1000;
+        var margin = 40;
+        // two sine waves per axis, different frequencies, no phase offset —
+        // starts at exactly 0 offset (so resuming from a frozen spot has
+        // zero jump) and drifts into an organic figure-eight-ish swing
+        var nx = wanderAnchorX + Math.sin(t * 0.6) * 70 + Math.sin(t * 1.7) * 25;
+        var ny = wanderAnchorY + Math.sin(t * 0.9) * 50 + Math.sin(t * 2.3) * 15;
+        targetX = Math.max(margin, Math.min(window.innerWidth - margin, nx));
+        targetY = Math.max(margin, Math.min(window.innerHeight - margin, ny));
+      }
+      
       var dx = targetX - x;
       var dy = targetY - y;
       x += dx * 0.18;
       y += dy * 0.18;
+      // x += dx * 0.08;
+      // y += dy * 0.08;
 
       var lean = Math.max(-20, Math.min(20, dx * 0.6));
       mouseTilt += (lean - mouseTilt) * 0.15;
