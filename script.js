@@ -106,6 +106,7 @@
 // })();
 
 // Butterfly cursor
+// Butterfly cursor
 (function () {
   function initButterflyCursor() {
     var bfc = document.getElementById('bfc');
@@ -125,33 +126,16 @@
     var isWandering = false;
     var wanderAnchorX = x, wanderAnchorY = y;
     var wanderStartTime = 0;
-    var wanderInterval = null;
-
-    function pickWanderTarget() {
-      // var margin = 50;
-      // targetX = margin + Math.random() * Math.max(1, window.innerWidth - margin * 2);
-      // targetY = margin + Math.random() * Math.max(1, window.innerHeight - margin * 2);
-      var swing = 80;
-      var margin = 40;
-      var nx = x + (Math.random() - 0.5) * swing * 2;
-      var ny = y + (Math.random() - 0.5) * swing * 2;
-      targetX = Math.max(margin, Math.min(window.innerWidth - margin, nx));
-      targetY = Math.max(margin, Math.min(window.innerHeight - margin, ny));
-    }
 
     function startWander() {
-      if (wanderInterval) return;   // scroll fires many times per gesture — this makes every call after the first a no-op instead of resetting the swing
-      // pickWanderTarget();
-      // wanderInterval = setInterval(pickWanderTarget, 700 + Math.random() * 400);
+      if (isWandering) return;   // scroll fires many times per gesture — this makes every call after the first a no-op instead of resetting the swing
       isWandering = true;
-        wanderAnchorX = x;         // swing begins from wherever the butterfly currently sits
-        wanderAnchorY = y;
-        wanderStartTime = performance.now();
+      wanderAnchorX = x;         // swing begins from wherever the butterfly currently sits
+      wanderAnchorY = y;
+      wanderStartTime = performance.now();
     }
 
     function stopWander() {
-      // clearInterval(wanderInterval);
-      // wanderInterval = null;
       isWandering = false;
       targetX = x;   // freeze exactly where it currently sits — not wherever it was still drifting toward
       targetY = y;
@@ -159,8 +143,6 @@
 
     if (isTouch) {
       bfc.style.opacity = '1';
-      // pickWanderTarget();
-      // setInterval(pickWanderTarget, 2200 + Math.random() * 1500);
     } else {
       window.addEventListener('mousemove', function (e) {
         targetX = e.clientX;
@@ -187,7 +169,6 @@
         if (isTouch) stopWander();   // scrolling has actually stopped (150ms since the last event) — freeze in place
       }, 150);
 
-      // if (isTouch) pickWanderTarget();
       if (isTouch) startWander();
     }, { passive: true });
 
@@ -243,8 +224,6 @@
       var dy = targetY - y;
       x += dx * 0.18;
       y += dy * 0.18;
-      // x += dx * 0.08;
-      // y += dy * 0.08;
 
       var lean = Math.max(-20, Math.min(20, dx * 0.6));
       mouseTilt += (lean - mouseTilt) * 0.15;
