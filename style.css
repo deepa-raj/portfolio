@@ -63,6 +63,14 @@ html {
   opacity: 1;
   transition: opacity 0.3s ease;
 }
+
+@media (max-width: 700px) {
+  .bfc {
+    width: 44px;
+    height: 44px;
+    margin: -22px 0 0 -22px;
+  }
+}
 /* .bfc svg { width: 100%; height: 100%; display: block; } */
 .bfc-art { width: 100%; height: 100%; display: block; }
 
@@ -99,10 +107,10 @@ html {
 @media (prefers-reduced-motion: reduce) {
   .bfc-float, .bfc-wing-left, .bfc-wing-right { animation: none; }
 }
-@media (pointer: coarse) {
+/* @media (pointer: coarse) {
   .bfc { display: none; }
   body, a, button { cursor: auto; }
-}
+} */
 
 
 
