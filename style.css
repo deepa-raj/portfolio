@@ -66,8 +66,8 @@ html {
 
 @media (max-width: 700px) {
   .bfc {
-    width: 44px;
-    height: 44px;
+    width: 54px;
+    height: 54px;
     margin: -22px 0 0 -22px;
   }
 }
@@ -1942,7 +1942,7 @@ footer {
   }
 
   .fsec .dp-logo {
-    width: 80px;
+    width: 60px;
     margin-top: 10px;
   }
 }

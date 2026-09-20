@@ -1,111 +1,5 @@
 
 // Butterfly cursor
-// (function () {
-//   function initButterflyCursor() {
-//     var bfc = document.getElementById('bfc');
-//     if (!bfc || !window.matchMedia('(pointer: fine)').matches) return;
-
-//     var targetX = window.innerWidth / 2;
-//     var targetY = window.innerHeight / 2;
-//     var x = targetX, y = targetY;
-//     var mouseTilt = 0;
-//     var scrollTilt = 0, scrollTarget = 0;
-//     var lastScrollY = window.scrollY;
-//     var scrollResetTimer = null;
-//     var lastSpawnX = x, lastSpawnY = y;
-//     var interacting = false;
-
-//     window.addEventListener('mousemove', function (e) {
-//       targetX = e.clientX;
-//       targetY = e.clientY;
-//       bfc.style.opacity = '1';
-//     });
-//     document.addEventListener('mouseleave', function () { bfc.style.opacity = '0'; });
-
-//     document.addEventListener('mouseover', function (e) {
-//       if (e.target.closest && e.target.closest('a, button')) interacting = true;
-//     });
-//     document.addEventListener('mouseout', function (e) {
-//       if (e.target.closest && e.target.closest('a, button')) interacting = false;
-//     });
-
-//     window.addEventListener('scroll', function () {
-//       var currentScrollY = window.scrollY;
-//       scrollTarget = currentScrollY > lastScrollY ? 5 : -5;
-//       lastScrollY = currentScrollY;
-//       clearTimeout(scrollResetTimer);
-//       scrollResetTimer = setTimeout(function () { scrollTarget = 0; }, 150);
-//     }, { passive: true });
-
-//     function spawnBeam(px, py, boosted) {
-//       var count = boosted ? 10 + Math.floor(Math.random() * 10) : 6 + Math.floor(Math.random() * 20);
-//       var spread = boosted ? 100 : 100;
-//       for (var i = 0; i < count; i++) {
-//         var angle = Math.random() * Math.PI * 2;
-//         var radius = Math.random() * spread;
-//         createParticle(px + Math.cos(angle) * radius, py + Math.sin(angle) * radius, boosted);
-//       }
-//     }
-
-//     function createParticle(px, py, boosted) {
-//       var el = document.createElement('span');
-//       el.className = 'bfl';
-//       var gold = Math.random() < .5;
-//       var size = boosted ? 2 + Math.random() * 2 : 3 + Math.random() * 2;
-//       var bg = gold
-//         ? 'radial-gradient(circle, #F5DFA3 0%, #fcfa98 70%, rgba(255, 205, 67, 0) 100%)'
-//         : 'radial-gradient(circle, #6fcbf0 0%, #76efff 60%, rgba(204, 252, 255, 0) 60%)';
-//       el.style.left = px + 'px';
-//       el.style.top = py + 'px';
-//       el.style.width = size + 'px';
-//       el.style.height = size + 'px';
-//       el.style.margin = (-size / 2) + 'px 0 0 ' + (-size / 2) + 'px';
-//       el.style.background = bg;
-//       el.style.opacity = boosted ? '0.8' : '0.9';
-//       el.style.transform = 'scale(1)';
-//       el.style.transition = 'opacity 1.1s ease-out, transform 1.1s ease-out';
-//       document.body.appendChild(el);
-//       requestAnimationFrame(function () {
-//         el.style.opacity = '0';
-//         el.style.transform = 'scale(0.2) translateY(-6px)';
-//       });
-//       setTimeout(function () { el.remove(); }, 1150);
-//     }
-
-//     function tick() {
-//       var dx = targetX - x;
-//       var dy = targetY - y;
-//       x += dx * 0.18;
-//       y += dy * 0.18;
-
-//       var lean = Math.max(-20, Math.min(20, dx * 0.6));
-//       mouseTilt += (lean - mouseTilt) * 0.15;
-//       scrollTilt += (scrollTarget - scrollTilt) * 0.12;
-
-//       var rotation = mouseTilt + scrollTilt;
-//       bfc.style.transform = 'translate3d(' + x + 'px,' + y + 'px,0) rotate(' + rotation.toFixed(1) + 'deg)';
-
-//       var dist = Math.hypot(x - lastSpawnX, y - lastSpawnY);
-//       var threshold = interacting ? 3 : 7;
-//       if (dist > threshold) {
-//         spawnBeam(x, y, interacting);
-//         lastSpawnX = x;
-//         lastSpawnY = y;
-//       }
-
-//       requestAnimationFrame(tick);
-//     }
-//     requestAnimationFrame(tick);
-//   }
-
-//   if (document.readyState === 'loading') {
-//     document.addEventListener('DOMContentLoaded', initButterflyCursor);
-//   } else {
-//     initButterflyCursor();
-//   }
-// })();
-
-// Butterfly cursor
 (function () {
   function initButterflyCursor() {
     var bfc = document.getElementById('bfc');
@@ -123,6 +17,10 @@
     var lastSpawnX = x, lastSpawnY = y;
     var interacting = false;
 
+    // Idle glow: keeps sparkles emitting while the butterfly is standing still
+    var lastIdleSpawn = 0;
+    var IDLE_INTERVAL = 140; // ms between idle sparkle bursts (higher = subtler)
+
     // Touch-device ambient wander: runs continuously (not tied to scrolling),
     // swinging around a soft anchor point that itself drifts to a new nearby
     // spot every few seconds — that's the "here and there" part.
@@ -131,7 +29,14 @@
     var wanderStartTime = 0;
     var WANDER_REANCHOR_MS = 4000;
 
+    // Touch drag: while a finger is down the butterfly follows it,
+    // then wanders again from wherever it was left.
+    var dragging = false;
+    var resumeTimer = null;
+    var RESUME_DELAY = 400; // ms after letting go before wandering resumes
+
     function reanchorWander() {
+      if (dragging) return; // don't drift the anchor while the user is dragging
       var margin = 60;
       var driftRadius = 120;
       var nx = wanderAnchorX + (Math.random() - 0.5) * driftRadius * 2;
@@ -149,9 +54,52 @@
       setInterval(reanchorWander, WANDER_REANCHOR_MS);
     }
 
+    function onTouchStart(e) {
+      var t = e.touches[0];
+      if (!t) return;
+      dragging = true;
+      isWandering = false;
+      clearTimeout(resumeTimer);
+      targetX = t.clientX;
+      targetY = t.clientY;
+    }
+
+    function onTouchMove(e) {
+      if (!dragging) return;
+      var t = e.touches[0];
+      if (!t) return;
+      targetX = t.clientX;
+      targetY = t.clientY;
+    }
+
+    function onTouchEnd(e) {
+      if (e.touches && e.touches.length > 0) {
+        // another finger is still down: keep following it
+        targetX = e.touches[0].clientX;
+        targetY = e.touches[0].clientY;
+        return;
+      }
+      dragging = false;
+      clearTimeout(resumeTimer);
+      resumeTimer = setTimeout(function () {
+        // restart the wander from the butterfly's current spot (zero jump)
+        wanderAnchorX = x;
+        wanderAnchorY = y;
+        wanderStartTime = performance.now();
+        isWandering = true;
+      }, RESUME_DELAY);
+    }
+
     if (isTouch) {
       bfc.style.opacity = '1';
       startWander();
+
+      // Touch events (not pointer events) keep firing while the page scrolls,
+      // and passive listeners mean normal scrolling is never blocked.
+      window.addEventListener('touchstart', onTouchStart, { passive: true });
+      window.addEventListener('touchmove', onTouchMove, { passive: true });
+      window.addEventListener('touchend', onTouchEnd, { passive: true });
+      window.addEventListener('touchcancel', onTouchEnd, { passive: true });
     } else {
       window.addEventListener('mousemove', function (e) {
         targetX = e.clientX;
@@ -177,12 +125,22 @@
     }, { passive: true });
 
     function spawnBeam(px, py, boosted) {
-      var count = boosted ? 20 + Math.floor(Math.random() * 5) : 6 + Math.floor(Math.random() * 20);
-      var spread = boosted ? 120 : 120;
+      var count = boosted ? 10 + Math.floor(Math.random() * 5) : 6 + Math.floor(Math.random() * 8);
+      var spread = boosted ? 80 : 80;
       for (var i = 0; i < count; i++) {
         var angle = Math.random() * Math.PI * 2;
         var radius = Math.random() * spread;
         createParticle(px + Math.cos(angle) * radius, py + Math.sin(angle) * radius, boosted);
+      }
+    }
+
+    // Gentle sparkle burst used while the butterfly is not moving
+    function spawnIdleGlow(px, py) {
+      var count = 12 + Math.floor(Math.random() * 12); // 3–5 particles
+      for (var i = 0; i < count; i++) {
+        var angle = Math.random() * Math.PI * 2;
+        var radius = Math.random() * 70; // tighter than the 120 used while moving
+        createParticle(px + Math.cos(angle) * radius, py + Math.sin(angle) * radius, true);
       }
     }
 
@@ -223,7 +181,7 @@
         targetX = Math.max(margin, Math.min(window.innerWidth - margin, nx));
         targetY = Math.max(margin, Math.min(window.innerHeight - margin, ny));
       }
-      
+
       var dx = targetX - x;
       var dy = targetY - y;
       x += dx * 0.18;
@@ -236,12 +194,20 @@
       var rotation = mouseTilt + scrollTilt;
       bfc.style.transform = 'translate3d(' + x + 'px,' + y + 'px,0) rotate(' + rotation.toFixed(1) + 'deg)';
 
+      var now = performance.now();
       var dist = Math.hypot(x - lastSpawnX, y - lastSpawnY);
       var threshold = interacting ? 3 : 7;
+
       if (dist > threshold) {
+        // Moving: normal beam
         spawnBeam(x, y, interacting);
         lastSpawnX = x;
         lastSpawnY = y;
+        lastIdleSpawn = now;
+      } else if (now - lastIdleSpawn > IDLE_INTERVAL) {
+        // Standing still: gentle idle glow
+        spawnIdleGlow(x, y);
+        lastIdleSpawn = now;
       }
 
       requestAnimationFrame(tick);
@@ -255,7 +221,6 @@
     initButterflyCursor();
   }
 })();
-
 
 
 
