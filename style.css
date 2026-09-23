@@ -74,7 +74,7 @@ html {
     /*54px*/
 
     width: 68px;
-    height: 54px;
+    height: 48px;
     margin: -19px 0 0 -27px;
   }
 }
@@ -116,10 +116,6 @@ html {
 @media (prefers-reduced-motion: reduce) {
   .bfc-float, .bfc-wing-left, .bfc-wing-right { animation: none; }
 }
-/* @media (pointer: coarse) {
-  .bfc { display: none; }
-  body, a, button { cursor: auto; }
-} */
 
 /* Thickness only */
 .bfc-antenna path { stroke-width: 4; }   /* was 6 in the source art */
@@ -360,43 +356,6 @@ nav.nav-hidden {
   animation-delay: 1.3s;
 }
 
-/* Continuous drift lives on the INNER group, entrance fade on the OUTER
-         wrapper above — two separate elements so the transforms don't clash. */
-/* .hc-cloud1 {
-  animation: driftWisp 34s ease-in-out infinite alternate;
-} */
-/* @keyframes driftWisp {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(18px);
-  }
-} */
-/* .hc-cloud2 {
-  animation: driftWisp2 30s ease-in-out infinite alternate;
-} */
-/* @keyframes driftWisp2 {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-16px);
-  }
-} */
-/* .hc-cloud3 {
-  left: 0;
-  top: 0; */
-  /* animation: driftMid 24s ease-in-out infinite alternate; */
-/* } */
-/* @keyframes driftMid {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-26px);
-  }
-} */
 
 
       .hc-cloud1 {
@@ -580,20 +539,6 @@ nav.nav-hidden {
   font-weight: 700;
 }
 
-
-/* @media (min-width: 481px) and (max-width: 860px){
-  .hero-inner {
-    top: 80px;
-    margin-left: 0;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    padding: 40px 24px;
-  }
-  .hero-copy{
-    font-size: 1rem;
-  }
-} */
 
 @media (max-width: 860px) {
   .hero-inner {
