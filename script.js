@@ -35,6 +35,9 @@
     var resumeTimer = null;
     var RESUME_DELAY = 400; // ms after letting go before wandering resumes
 
+    var isDraggingButterfly = false;
+    var HIT_RADIUS = 40; // px — how close a touch must land to the butterfly's current spot to count as "grabbing" it
+
     function reanchorWander() {
       if (dragging) return; // don't drift the anchor while the user is dragging
       var margin = 60;
@@ -62,6 +65,9 @@
       clearTimeout(resumeTimer);
       targetX = t.clientX;
       targetY = t.clientY;
+
+      var distToButterfly = Math.hypot(t.clientX - x, t.clientY - y);
+      isDraggingButterfly = distToButterfly <= HIT_RADIUS;
     }
 
     function onTouchMove(e) {
@@ -70,6 +76,8 @@
       if (!t) return;
       targetX = t.clientX;
       targetY = t.clientY;
+
+      if (isDraggingButterfly) e.preventDefault(); // this is the actual scroll-pause — only fires when the grab started on the butterfly
     }
 
     function onTouchEnd(e) {
@@ -80,6 +88,7 @@
         return;
       }
       dragging = false;
+      isDraggingButterfly = false; // scroll is free again the moment this flips back
       clearTimeout(resumeTimer);
       resumeTimer = setTimeout(function () {
         // restart the wander from the butterfly's current spot (zero jump)
@@ -97,7 +106,7 @@
       // Touch events (not pointer events) keep firing while the page scrolls,
       // and passive listeners mean normal scrolling is never blocked.
       window.addEventListener('touchstart', onTouchStart, { passive: true });
-      window.addEventListener('touchmove', onTouchMove, { passive: true });
+      window.addEventListener('touchmove', onTouchMove, { passive: false }); // was passive: true — must be false for preventDefault to actually work
       window.addEventListener('touchend', onTouchEnd, { passive: true });
       window.addEventListener('touchcancel', onTouchEnd, { passive: true });
     } else {
@@ -125,7 +134,7 @@
     }, { passive: true });
 
     function spawnBeam(px, py, boosted) {
-      var count = boosted ? 10 + Math.floor(Math.random() * 5) : 6 + Math.floor(Math.random() * 8);
+      var count = boosted ? 40 + Math.floor(Math.random() * 5) : 6 + Math.floor(Math.random() * 8);
       var spread = boosted ? 80 : 80;
       for (var i = 0; i < count; i++) {
         var angle = Math.random() * Math.PI * 2;
@@ -136,7 +145,7 @@
 
     // Gentle sparkle burst used while the butterfly is not moving
     function spawnIdleGlow(px, py) {
-      var count = 12 + Math.floor(Math.random() * 12); // 3–5 particles
+      var count = 16 + Math.floor(Math.random() * 12); // 3–5 particles
       for (var i = 0; i < count; i++) {
         var angle = Math.random() * Math.PI * 2;
         var radius = Math.random() * 70; // tighter than the 120 used while moving
