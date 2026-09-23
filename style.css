@@ -87,8 +87,8 @@ html {
 }
 .bfc-float {
   animation: bfcBob 2.4s ease-in-out infinite;
-  /* transform-origin: 17px 27px; */
-  transform-origin: 62.5px 48px;
+  transform-origin: 414px 220px;
+  /* transform-origin: 62.5px 48px; */
 }
 
 @keyframes bfcFlap {
@@ -115,18 +115,6 @@ html {
 
 @media (prefers-reduced-motion: reduce) {
   .bfc-float, .bfc-wing-left, .bfc-wing-right { animation: none; }
-}
-
-/* Thickness only */
-.bfc-antenna path { stroke-width: 4; }   /* was 6 in the source art */
-
-/* Tip-dot size only */
-.bfc-antenna circle { r: 8; }            /* was 11 */
-
-/* Length AND thickness together, scaled outward from the head */
-.bfc-antenna {
-  transform: scale(0.85);
-  transform-origin: 414px 220px;
 }
 
 
